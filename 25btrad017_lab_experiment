@@ -1,0 +1,65 @@
+# 25BTRAD17_lab_experiment
+1)Installing Python, Setting up VS Code / PyCharm, Jupyter Notebook
+installing Python
+1.	Go to the Python official website. 
+2.	Download the latest version of Python. 
+3.	Run the installer. 
+4.	Select "Add Python to PATH". 
+5.	Click Install Now. 
+6.	After installation, open Command Prompt and type:
+7.	If the Python version is displayed, the installation is successful.
+Setting up VS Code
+1.	Download and install Visual Studio Code. 
+2.	Open VS Code. 
+3.	Install the Python Extension from the Extensions tab. 
+4.	Open a Python file (.py). 
+5.	Select the installed Python interpreter. 
+6.	Write and run the Python program. 
+Setting up PyCharm
+1.	Download and install PyCharm Community Edition. 
+2.	Open PyCharm. 
+3.	Click New Project. 
+4.	Select the installed Python interpreter. 
+5.	Create a Python file. 
+6.	Write the code and click Run. 
+Setting up Jupyter Notebook
+1.	Open Command Prompt. 
+2.	Install Jupyter Notebook:
+pip install notebook
+3.	Start Jupyter Notebook:
+jupyter notebook
+4.	A browser window opens automatically. 
+5.	Click New → Python 3. 
+6.	Write Python code in the notebook cells and run them using Shift + Enter.
+
+
+2 )Write and execute a basic Python program.
+
+print("hello world")
+print("i am yuktha")
+
+output: 
+3) Programs using variables, operators, and input/output
+a = int(input("enter the number:"))
+b = int(input("enter the another number:"))
+c = a+b
+d = a*b
+print(c)
+print(d)
+ 
+4) Simple calculator and area calculation programs.
+s = int(input("side of square"))
+area = s * s
+print("area of  square:",area)"""
+
+"""a = int(input("enter the number:"))
+b = int(input("enter another number:"))
+c = input("enter the operation u want to perform:")
+if c =="add":
+    print(a+b)
+if c == "sub":
+    print(a-b)
+elif c == "mul":
+    print(a*b)
+else :
+    print (a/b)
