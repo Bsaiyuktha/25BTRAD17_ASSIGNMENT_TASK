@@ -1,0 +1,218 @@
+"""Mini Project (Unit 3) -
+Attendance Tracker
+Data structure: dict {student_name: [list of "P"/"A" for each class held]}.
+"""
+
+attendance = {}
+
+
+def add_student(name):
+    if name in attendance:
+        return "Student already exists."
+    attendance[name] = []
+    return "Student added."
+
+
+def mark(name, status):
+    """Add one day's attendance. status: P (present) or A (absent)."""
+    status = status.upper()
+    if name not in attendance:
+        return "Student not found."
+    if status not in ("P", "A"):
+        return "Status must be P or A."
+    attendance[name].append(status)
+    return "Attendance recorded."
+
+
+def update(name, day, status):
+    """Correct an existing record. day is 1-based."""
+    status = status.upper()
+    if name not in attendance:
+        return "Student not found."
+    if status not in ("P", "A"):
+        return "Status must be P or A."
+    if not 1 <= day <= len(attendance[name]):
+        return "Invalid day number."
+    attendance[name][day - 1] = status
+    return "Attendance updated."
+
+
+def percentage(name):
+    records = attendance[name]
+    if not records:
+        return 0.0
+    return records.count("P") / len(records) * 100
+
+
+def below_threshold(threshold=75):
+    return [(n, percentage(n)) for n in attendance if percentage(n) < threshold]
+
+
+def display():
+    if not attendance:
+        print("No students.")
+        return
+    print(f"{'Student':<12}{'Records':<25}{'Present':<9}{'Total':<7}{'%'}")
+    print("-" * 60)
+    for n, rec in attendance.items():
+        print(f"{n:<12}{' '.join(rec):<25}{rec.count('P'):<9}{len(rec):<7}{percentage(n):.1f}")
+
+
+def run_tests():
+    attendance.clear()
+    # Scenario 1: normal data
+    add_student("Asha"); add_student("Ravi"); add_student("Meena")
+    for s in "PPPP": mark("Asha", s)           # 100%
+    for s in "PAPA": mark("Ravi", s)           # 50%
+    for s in "PPPA": mark("Meena", s)          # 75%
+    assert percentage("Asha") == 100 and percentage("Ravi") == 50
+    assert percentage("Meena") == 75
+    # Scenario 2: threshold (75 is NOT below 75)
+    assert [n for n, _ in below_threshold(75)] == ["Ravi"]
+    assert sorted(n for n, _ in below_threshold(80)) == ["Meena", "Ravi"]
+    # Scenario 3: update changes percentage
+    update("Ravi", 2, "P"); update("Ravi", 4, "P")
+    assert percentage("Ravi") == 100
+    # Scenario 4: invalid inputs and edge cases
+    assert add_student("Asha") == "Student already exists."
+    assert mark("Ghost", "P") == "Student not found."
+    assert mark("Asha", "X") == "Status must be P or A."
+    assert update("Asha", 9, "A") == "Invalid day number."
+    add_student("New")
+    assert percentage("New") == 0.0            # no classes held yet, no crash
+    print("All attendance tests passed.\n")
+
+
+def menu():
+    while True:
+        print("\n1.Add student 2.Mark attendance 3.Update record "
+              "4.Display 5.Below threshold 6.Exit")
+        ch = input("Choice: ").strip()
+        if ch == "1":
+            print(add_student(input("Name: ")))
+        elif ch == "2":
+            print(mark(input("Name: "), input("Status (P/A): ")))
+        elif ch == "3":
+            print(update(input("Name: "), int(input("Day no.: ")), input("New status (P/A): ")))
+        elif ch == "4":
+            display()
+        elif ch == "5":
+            t = float(input("Threshold %: "))
+            low = below_threshold(t)
+            for n, p in low:
+                print(f"{n}: {p:.1f}% (shortage)")
+            if not low:
+                print("Everyone meets the threshold.")
+        elif ch == "6":
+            break
+        else:
+            print("Invalid choice.")
+
+
+if __name__ == "__main__":
+    run_tests()
+    menu()
+"""Mini Project (Unit 3) -
+Sales Data Analyzer.
+Data structure: list of dicts [{"product":..., "qty":..., "price":...}].
+"""
+
+sales = []
+
+
+def find(product):
+    for p in sales:
+        if p["product"].lower() == product.lower():
+            return p
+    return None
+
+
+def add_or_update(product, qty, price):
+    """Add a new product, or add to quantity (and refresh price) if it exists."""
+    if qty < 0 or price < 0:
+        return "Quantity and price cannot be negative."
+    p = find(product)
+    if p:
+        p["qty"] += qty
+        p["price"] = price
+        return "Sales record updated."
+    sales.append({"product": product, "qty": qty, "price": price})
+    return "Product added."
+
+
+def revenue(p):
+    return p["qty"] * p["price"]
+
+
+def total_sales():
+    return sum(revenue(p) for p in sales)
+
+
+def top_by_quantity():
+    return max(sales, key=lambda p: p["qty"]) if sales else None
+
+
+def top_by_revenue():
+    return max(sales, key=revenue) if sales else None
+
+
+def summary():
+    if not sales:
+        print("No sales data.")
+        return
+    total = total_sales()
+    print(f"{'Product':<12}{'Qty':<7}{'Price':<9}{'Revenue':<11}{'Share %'}")
+    print("-" * 50)
+    for p in sorted(sales, key=revenue, reverse=True):
+        share = revenue(p) / total * 100 if total else 0
+        print(f"{p['product']:<12}{p['qty']:<7}{p['price']:<9.2f}{revenue(p):<11.2f}{share:.1f}")
+    print("-" * 50)
+    print(f"Total sales: {total:.2f}")
+    q, r = top_by_quantity(), top_by_revenue()
+    print(f"Highest-selling (units)  : {q['product']} ({q['qty']})")
+    print(f"Highest revenue          : {r['product']} ({revenue(r):.2f})")
+    if q is not r:
+        print("Note: the best-selling product by units is not the top earner;"
+              " price drives the difference.")
+
+
+def run_tests():
+    # Dataset 1: normal
+    sales.clear()
+    add_or_update("Pen", 100, 10)       # 1000
+    add_or_update("Notebook", 40, 50)   # 2000
+    add_or_update("Bag", 5, 500)        # 2500
+    assert total_sales() == 5500
+    assert top_by_quantity()["product"] == "Pen"
+    assert top_by_revenue()["product"] == "Bag"     # units and revenue differ
+    # Dataset 2: update existing product (case-insensitive)
+    assert add_or_update("pen", 50, 10) == "Sales record updated."
+    assert find("Pen")["qty"] == 150 and len(sales) == 3
+    assert total_sales() == 6000
+    # Dataset 3: edge cases
+    assert add_or_update("Ink", -1, 5) == "Quantity and price cannot be negative."
+    sales.clear()
+    assert total_sales() == 0 and top_by_quantity() is None
+    add_or_update("Free", 10, 0)
+    assert total_sales() == 0           # zero-price item, no division error in summary
+    print("All sales analyzer tests passed.\n")
+
+
+def menu():
+    while True:
+        print("\n1.Add/Update sale 2.Summary 3.Exit")
+        ch = input("Choice: ").strip()
+        if ch == "1":
+            print(add_or_update(input("Product: "), int(input("Qty sold: ")),
+                                float(input("Unit price: "))))
+        elif ch == "2":
+            summary()
+        elif ch == "3":
+            break
+        else:
+            print("Invalid choice.")
+
+
+if __name__ == "__main__":
+    run_tests()
+    menu()
